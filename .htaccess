@@ -1,0 +1,14 @@
+RewriteEngine On
+
+# Enable error display for debugging (remove in production)
+php_flag display_errors On
+php_value error_reporting E_ALL
+
+# Prevent directory listing
+Options -Indexes
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Allow sessions to work
+php_flag session.auto_start off
