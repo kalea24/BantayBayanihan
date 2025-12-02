@@ -23,7 +23,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
         <div class="container">
-            <a class="navbar-brand" href="index.php">🚨 Bantay Bayanihan</a>
+            <a class="navbar-brand" href="index.php">Bantay Bayanihan</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" href="auth/login.php">Login</a>
                 <a class="nav-link" href="auth/register.php">Register</a>
@@ -34,7 +34,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-8 mx-auto text-center">
-                <h1>Welcome to Disaster Preparedness Platform</h1>
+                <h1>Welcome to Bantay Bayanihan</h1>
                 <p class="lead">Enhance community safety through GIS mapping, AI assistance, and gamified preparedness training.</p>
                 
                 <div class="row mt-5">

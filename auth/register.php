@@ -33,7 +33,7 @@ $default_role = isset($_GET['role']) ? $_GET['role'] : 'resident';
 <body class="bg-light">
     <nav class="navbar navbar-dark bg-danger">
         <div class="container">
-            <a class="navbar-brand" href="../index.php">🚨 Bantay Bayanihan</a>
+            <a class="navbar-brand" href="../index.php">Bantay Bayanihan</a>
         </div>
     </nav>
 

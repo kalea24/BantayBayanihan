@@ -81,7 +81,7 @@ $checklist_percentage = $checklist['total_items'] > 0
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.php">🚨 Bantay Bayanihan</a>
+            <a class="navbar-brand" href="index.php">Bantay Bayanihan</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>

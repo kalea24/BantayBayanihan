@@ -37,7 +37,7 @@ $user->getById($_SESSION['user_id']);
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.php">🚨 Bantay Bayanihan</a>
+            <a class="navbar-brand" href="index.php">Bantay Bayanihan</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -104,7 +104,7 @@ $user->getById($_SESSION['user_id']);
                 <h3>Choose a Drill Type</h3>
             </div>
             <div class="col-md-3">
-                <div class="card drill-card" onclick="loadDrill('earthquake')">
+                <div class="card drill-card" onclick="selectDrill('earthquake')">
                     <div class="card-body text-center">
                         <h1>🌍</h1>
                         <h5>Earthquake</h5>
@@ -113,7 +113,7 @@ $user->getById($_SESSION['user_id']);
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card drill-card" onclick="loadDrill('flood')">
+                <div class="card drill-card" onclick="selectDrill('flood')">
                     <div class="card-body text-center">
                         <h1>🌊</h1>
                         <h5>Flood</h5>
@@ -122,7 +122,7 @@ $user->getById($_SESSION['user_id']);
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card drill-card" onclick="loadDrill('fire')">
+                <div class="card drill-card" onclick="selectDrill('fire')">
                     <div class="card-body text-center">
                         <h1>🔥</h1>
                         <h5>Fire</h5>
@@ -131,7 +131,7 @@ $user->getById($_SESSION['user_id']);
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card drill-card" onclick="loadDrill('typhoon')">
+                <div class="card drill-card" onclick="selectDrill('typhoon')">
                     <div class="card-body text-center">
                         <h1>🌀</h1>
                         <h5>Typhoon</h5>
@@ -149,14 +149,82 @@ $user->getById($_SESSION['user_id']);
                         <h4 id="drillTitle"></h4>
                     </div>
                     <div class="card-body">
-                        <!-- Tasks -->
-                        <div id="tasksList"></div>
+                        <!-- Phase Indicator -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-secondary" id="phase1Badge">1. Learn</span>
+                                <span class="badge bg-secondary" id="phase2Badge">2. Practice</span>
+                                <span class="badge bg-secondary" id="phase3Badge">3. Assessment</span>
+                                <span class="badge bg-secondary" id="phase4Badge">4. Certified</span>
+                            </div>
+                        </div>
 
-                        <!-- Quiz Section -->
-                        <div id="quizSection" style="display: none;">
-                            <h5>Knowledge Check</h5>
-                            <div id="quizQuestions"></div>
-                            <button class="btn btn-success mt-3" onclick="submitQuiz()">Submit Quiz</button>
+                        <!-- Learning Phase -->
+                        <div id="learningPhase" style="display: none;">
+                            <h5>📚 Learning Phase</h5>
+                            <div id="learningContent"></div>
+                            <button class="btn btn-success mt-3" onclick="completePhase('learning')">
+                                I've Read This → Continue to Practice
+                            </button>
+                        </div>
+
+                        <!-- Practice Phase -->
+                        <div id="practicePhase" style="display: none;">
+                            <h5>🎯 Practice Phase</h5>
+                            <p class="text-muted">Complete these real-world scenarios</p>
+                            <div id="scenarioContent"></div>
+                        </div>
+
+                        <!-- Assessment Phase -->
+                        <div id="assessmentPhase" style="display: none;">
+                            <!-- Timer Display -->
+                            <div class="alert alert-warning mb-4" id="timerAlert">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1">⏰ Time Remaining: <span id="timerDisplay">10:00</span></h5>
+                                        <small>Assessment will auto-submit when time expires</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="progress" style="width: 200px; height: 25px;">
+                                            <div class="progress-bar bg-success" id="timerProgress" 
+                                                 role="progressbar" style="width: 100%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5>📝 Final Assessment</h5>
+                            <p class="text-muted">Answer all questions. You have 10 minutes.</p>
+                            <div class="alert alert-danger">
+                                <strong>⚠️ Important:</strong>
+                                <ul class="mb-0">
+                                    <li>You have 10 minutes to complete this assessment</li>
+                                    <li>This assessment can only be taken ONCE</li>
+                                    <li>Assessment will auto-submit when time expires</li>
+                                    <li>Make sure you're ready before starting!</li>
+                                </ul>
+                            </div>
+                            <div id="assessmentContent"></div>
+                            <button class="btn btn-success btn-lg mt-3" onclick="submitAssessment()">
+                                Submit Final Assessment
+                            </button>
+                        </div>
+
+                        <!-- Completion Phase -->
+                        <div id="completionPhase" style="display: none;">
+                            <div class="text-center py-5">
+                                <h1>🎉</h1>
+                                <h3>Congratulations!</h3>
+                                <p class="lead">You've completed the <span id="completedDrillName"></span> drill!</p>
+                                <div class="my-4">
+                                    <h2 class="text-success">+<span id="totalPointsEarned">0</span> Points</h2>
+                                    <div id="badgesEarned"></div>
+                                </div>
+                                <button class="btn btn-primary" onclick="location.reload()">
+                                    Try Another Drill
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -168,10 +236,26 @@ $user->getById($_SESSION['user_id']);
                         <h5>Progress</h5>
                     </div>
                     <div class="card-body">
-                        <div class="progress mb-3">
-                            <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+                        <div class="progress mb-3" style="height: 30px;">
+                            <div id="progressBar" class="progress-bar progress-bar-striped" 
+                                 role="progressbar" style="width: 0%">0%</div>
                         </div>
                         <div id="progressDetails"></div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5>💡 Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="small">
+                            <li>Read learning materials carefully</li>
+                            <li>Practice scenarios help reinforce knowledge</li>
+                            <li>Assessment can only be taken ONCE</li>
+                            <li>Higher scores = more points</li>
+                            <li>Complete all drill types to level up</li>
+                        </ul>
                     </div>
                 </div>
             </div>

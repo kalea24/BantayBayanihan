@@ -35,12 +35,29 @@ foreach ($geojson_files as $type => $filepath) {
         continue;
     }
 
-    // Map type names
+    // Map type names - YOUR GEOJSON USES EXACT NAMES
     $type_map = [
         'schools' => 'school',
         'brgy_halls' => 'barangay_hall',
         'courts' => 'court'
     ];
+    
+    // Determine type from properties if available
+    $site_type = $type_map[$type];
+    
+    // Try to get more specific type from Type field
+    if (isset($props['Type'])) {
+        $type_value = strtolower($props['Type']);
+        if (strpos($type_value, 'covered court') !== false) {
+            $site_type = 'covered_court';
+        } elseif (strpos($type_value, 'barangay hall') !== false) {
+            $site_type = 'barangay_hall';
+        } elseif (strpos($type_value, 'school') !== false) {
+            $site_type = 'school';
+        } elseif (strpos($type_value, 'court') !== false) {
+            $site_type = 'court';
+        }
+    }
 
     // Insert each feature
     foreach ($geojson['features'] as $feature) {
@@ -52,26 +69,54 @@ foreach ($geojson_files as $type => $filepath) {
             $lng = $coords[0];
             $lat = $coords[1];
 
-            // Extract name (try common field names)
-            $name = $props['name'] ?? 
+            // Extract name - YOUR GEOJSON USES "Facility"
+            $name = $props['Facility'] ?? 
+                    $props['FACILITY'] ?? 
+                    $props['facility'] ??
+                    $props['name'] ?? 
                     $props['NAME'] ?? 
                     $props['sitename'] ?? 
                     $props['SITENAME'] ?? 
+                    $props['site_name'] ?? 
+                    $props['SITE_NAME'] ??
+                    $props['Place_Name'] ??
+                    $props['placename'] ??
+                    $props['School'] ??
+                    $props['SCHOOL'] ??
                     'Unnamed Site';
+            
+            // Clean up the name if needed
+            $name = trim($name);
+            
+            // If still unnamed, try to construct from type + barangay
+            if ($name === 'Unnamed Site' || empty($name)) {
+                $possibleName = ($props['type'] ?? $props['TYPE'] ?? $props['Type'] ?? '') . ' ' . 
+                               ($props['barangay'] ?? $props['BARANGAY'] ?? $props['Barangay'] ?? '');
+                if (trim($possibleName) !== '') {
+                    $name = trim($possibleName);
+                }
+            }
 
-            // Extract barangay
-            $barangay = $props['barangay'] ?? 
+            // Extract barangay - YOUR GEOJSON USES "Barangay"
+            $barangay = $props['Barangay'] ??
                        $props['BARANGAY'] ?? 
+                       $props['barangay'] ?? 
                        $props['brgy'] ?? 
+                       $props['BRGY'] ??
                        'Unknown';
 
-            // Extract address
+            // Extract address (use Facility as address if no specific address field)
             $address = $props['address'] ?? 
                       $props['ADDRESS'] ?? 
+                      $props['location'] ??
+                      $props['LOCATION'] ??
+                      $props['Facility'] ??
                       $barangay;
 
             // Extract capacity if available
-            $capacity = isset($props['capacity']) ? intval($props['capacity']) : 0;
+            $capacity = isset($props['capacity']) ? intval($props['capacity']) : 
+                       (isset($props['CAPACITY']) ? intval($props['CAPACITY']) : 
+                       (isset($props['Capacity']) ? intval($props['Capacity']) : 0));
 
             // Prepare SQL
             $query = "INSERT INTO evacuation_sites 
@@ -87,14 +132,15 @@ foreach ($geojson_files as $type => $filepath) {
             $default_facilities = [
                 'school' => '["water", "electricity", "toilets"]',
                 'barangay_hall' => '["water", "electricity", "toilets", "communication"]',
-                'court' => '["water", "toilets"]'
+                'court' => '["water", "toilets"]',
+                'covered_court' => '["water", "toilets"]'
             ];
 
-            $facilities = $default_facilities[$type_map[$type]] ?? '[]';
+            $facilities = $default_facilities[$site_type] ?? '[]';
 
             // Bind and execute
             $stmt->bindParam(':name', $name);
-            $stmt->bindParam(':type', $type_map[$type]);
+            $stmt->bindParam(':type', $site_type);
             $stmt->bindParam(':barangay', $barangay);
             $stmt->bindParam(':address', $address);
             $stmt->bindParam(':lng', $lng);
